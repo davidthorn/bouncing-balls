@@ -1,0 +1,158 @@
+<canvas id="cv"></canvas>
+<style>
+    body {
+        padding: 0px;
+        margin: 0px;
+    }
+    #cv {
+        margin: 0px;
+    }
+</style>
+<script>
+
+const frameRate = 100 / 100;
+
+const canvasWidth = window.innerWidth;
+const canvasHeight = window.innerHeight;
+
+const canvas = document.getElementById('cv');
+canvas.width = 600;
+canvas.height = 600;
+
+const canvasContext = canvas.getContext('2d');
+
+var balls = [];
+
+function generateYVelocity() {
+    return Math.floor( (Math.random() * 1) + 1 );
+}
+
+function generateXVelocity() {
+    return Math.floor( (Math.random() * 1) + 1 );
+}
+
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+function generateBall() {
+    let size = Math.floor(Math.random() * 40);
+    return {
+        xv : generateXVelocity(),
+        yv : generateYVelocity(),
+        boxX : Math.floor(Math.random() * canvas.width),
+        boxY : Math.floor(Math.random() * canvas.height),
+        boxH : size,
+        boxW : size,
+        isMovingDown: true,
+        isMovingRight : true,
+        rgb: getRandomColor()
+    }
+}
+
+function addBall() {
+    balls.push(generateBall());
+    // balls.push(generateBall());
+    // balls.push(generateBall());
+    // balls.push(generateBall());
+    // balls.push(generateBall());
+    balls.push(generateBall());
+}
+
+document.addEventListener('click', addBall);
+
+window.onload = () => {
+
+    balls.push(generateBall());
+   
+    balls.forEach((b) => {
+        console.log(b);
+    })
+
+    setInterval(drawCanvas , frameRate);
+
+}
+    
+function drawCanvas() {
+    canvasContext.beginPath();
+    canvasContext.rect(0 , 0 , canvasWidth, canvasHeight);
+    canvasContext.fillStyle = "#ddd";
+    canvasContext.fill();
+    drawBox(canvasContext);
+}
+
+function drawBox(context) {
+
+    balls.forEach((ball) => {
+
+        if(!hasReachedRightSide(ball.boxX, ball.boxY, ball.boxW, ball.boxH) && ball.isMovingRight) {
+            ball.boxX += ball.xv;
+        } else {
+            if(ball.isMovingRight) {
+                ball.isMovingRight = false;
+                ball.xv = generateXVelocity();
+                ball.boxX = canvas.width;
+            }
+        }
+
+        if(!hasReachedLeftSide(ball.boxX, ball.boxY, ball.boxW, ball.boxH) && (ball.isMovingRight === false)) {
+            ball.boxX -= ball.xv;
+        } else {
+            
+            if(ball.isMovingRight === false) {
+                xv = generateXVelocity();
+                ball.isMovingRight = true;
+                ball.boxX = 0;
+            }
+        }
+
+        if(!hasReachedBottom(ball.boxX, ball.boxY, ball.boxW, ball.boxH) && ball.isMovingDown ) {
+            ball.boxY += ball.yv;
+        } else {
+            if(ball.isMovingDown) {
+                ball.yv = generateYVelocity();
+                ball.isMovingDown = false;
+                ball.boxY = canvas.height;
+            }
+        }
+
+        if(!hasReachedTop(ball.boxX, ball.boxY, ball.boxW, ball.boxH) && (ball.isMovingDown === false)) {
+            ball.boxY -= ball.yv;
+        } else {
+            if(ball.isMovingDown === false) {
+                ball.isMovingDown = true;
+                ball.yv = generateYVelocity();
+                ball.boxY = 0;
+            }
+        }
+
+        canvasContext.beginPath();
+        canvasContext.fillStyle = ball.rgb;
+        canvasContext.arc(ball.boxX,ball.boxY,ball.boxH,0,2*Math.PI);
+        canvasContext.fill();
+    
+    })
+}
+
+function hasReachedRightSide(x,y,w,h) {
+    return ( x + w ) >= canvas.width 
+}
+
+function hasReachedLeftSide(x,y,w,h) {
+    return x <= 0
+}
+
+function hasReachedTop(x,y,w,h) {
+    return y <= 0
+}
+
+function hasReachedBottom(x,y,w,h) {
+    return  ( y + h ) >= canvas.height 
+}
+
+</script>
